@@ -26,6 +26,7 @@ TARGET = "isFraud"
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 
-# Divisão temporal: treino com step <= este valor, teste com o restante.
-# step vai de 1 a 744 (horas). Revisar após a análise exploratória.
+# Divisão temporal: treino com step <= este valor (dias 1 a 23), teste com o restante (dias 24 a 31).
+# Decisão do grupo após a análise exploratória: manter o corte. As legítimas caem muito a partir
+# do dia 18, então o teste tem ~2,6% de fraude e o treino ~0,23% (registrado como limitação).
 TEMPORAL_SPLIT_STEP = 24 * 23

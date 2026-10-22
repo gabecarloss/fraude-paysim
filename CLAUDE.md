@@ -59,6 +59,14 @@ escopo; estas regras existem para não fugir dela.
 - Referências em documentos seguem ABNT. Nunca inventar referência, autor ou dado estatístico.
 - Perguntar antes de adicionar dependência nova; se aprovada, incluir em `requirements.txt`.
 
+## Roteiro da apresentação
+- Manter `docs/roteiro_apresentacao.md` atualizado junto com o trabalho: a cada etapa
+  concluída, registrar no slide correspondente as decisões, os achados e os números.
+  No fim do trabalho, esse arquivo será usado para gerar a apresentação.
+- A apresentação deve ser breve: cerca de 10 slides, uma ideia por slide, tópicos curtos.
+- Indicar a origem de cada número (script executado ou referência da proposta) e marcar como
+  pendente o que ainda não foi feito. Números da proposta só entram depois de conferidos na fonte.
+
 ## Ambiente
 - Windows, PowerShell, Python 3.12, ambiente em `.venv` na raiz
   (`.\.venv\Scripts\Activate.ps1`).

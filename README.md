@@ -11,6 +11,7 @@ fraudulentas usando a base pública PaySim, com uma aplicação web simples para
 app/            servidor FastAPI e interface (HTML/CSS/JS em app/static)
 data/raw/       CSV original do Kaggle (não versionado)
 data/processed/ dados filtrados prontos para o treino
+docs/           roteiro da apresentação
 models/         modelos treinados (.joblib)
 notebooks/      análise exploratória
 reports/        métricas e gráficos gerados
@@ -56,3 +57,9 @@ uvicorn app.main:app --reload  # abre a aplicação em http://127.0.0.1:8000
 
 A base é simulada e não é brasileira; os resultados não devem ser usados isoladamente em
 decisões financeiras reais.
+
+Na base, as transações legítimas caem muito a partir do dia 18, enquanto as fraudes seguem
+constantes. Com o corte temporal escolhido (treino nos dias 1 a 23, teste nos dias 24 a 31), o teste
+tem cerca de 2,6% de fraude e o treino cerca de 0,23%. Por isso, Precision e PR-AUC da divisão
+temporal não são comparáveis diretamente com as da divisão estratificada. Detalhes em
+`notebooks/01_analise_exploratoria.ipynb`.
