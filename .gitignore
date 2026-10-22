@@ -1,0 +1,29 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Dados (base do Kaggle tem ~470 MB, não versionar)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Modelos treinados
+models/*
+!models/.gitkeep
+
+# Banco SQLite da aplicação
+*.db
+*.sqlite3
+
+# Editor / SO
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+.env

@@ -1,0 +1,15 @@
+# Dados e modelagem
+pandas>=2.2
+numpy>=1.26
+pyarrow>=15.0
+scikit-learn>=1.5
+imbalanced-learn>=0.13
+joblib>=1.4
+
+# Análise exploratória / gráficos
+matplotlib>=3.8
+ipykernel>=6.29
+
+# Aplicação web
+fastapi>=0.110
+uvicorn>=0.29

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Detecção de Fraudes</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main>
+    <h1>Detecção de Fraudes</h1>
+    <p class="aviso">Ferramenta de apoio à análise. Não usar isoladamente para decisões reais.</p>
+
+    <form id="form">
+      <label>Tipo
+        <select name="type">
+          <option value="TRANSFER">TRANSFER</option>
+          <option value="CASH_OUT">CASH_OUT</option>
+        </select>
+      </label>
+      <label>Valor
+        <input name="amount" type="number" step="0.01" min="0.01" required>
+      </label>
+      <label>Hora do dia (0-23)
+        <input name="hour" type="number" min="0" max="23" required>
+      </label>
+      <button type="submit">Analisar</button>
+    </form>
+
+    <pre id="resultado"></pre>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
