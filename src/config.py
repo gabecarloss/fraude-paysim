@@ -8,6 +8,7 @@ DATA_RAW = ROOT / "data" / "raw"
 DATA_PROCESSED = ROOT / "data" / "processed"
 MODELS_DIR = ROOT / "models"
 REPORTS_DIR = ROOT / "reports"
+FIGURES_DIR = REPORTS_DIR / "figures"
 
 # Nome do CSV baixado do Kaggle (ealaxi/paysim1)
 RAW_CSV = DATA_RAW / "PS_20174392719_1491204439457_log.csv"
@@ -37,3 +38,13 @@ VALIDATION_SIZE = 0.2
 # Temporal: os últimos dias do treino. Ajuste com step <= este valor (dias 1 a 19),
 # validação nos dias 20 a 23 (60.569 transações, 980 fraudes).
 VALIDATION_TEMPORAL_STEP = 24 * 19
+
+# Modelo da aplicação (Etapa 2): escolhido pela PR-AUC na VALIDAÇÃO, entre os 4 modelos da divisão
+# estratificada (decisão do grupo: mesma distribuição da base inteira). A PR-AUC não se compara
+# entre divisões, porque depende da proporção de fraude.
+DIVISAO_APLICACAO = "estratificada"
+# Desempate (decisão do grupo, fixada antes de rodar): se um modelo com arquivo menor ficar a menos
+# de 0,01 da maior PR-AUC na validação, ele é o escolhido.
+TOLERANCIA_PR_AUC = 0.01
+# Arquivo lido pela aplicação: pipeline + limite de decisão + importâncias.
+MODELO_APLICACAO = MODELS_DIR / "modelo_aplicacao.joblib"

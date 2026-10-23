@@ -58,7 +58,7 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   comparados dentro de cada divisão, não uma divisão contra a outra.
 - Origem: `notebooks/01_analise_exploratoria.ipynb`, executado em 22/10/2026.
 
-## 7. Metodologia ✅ (métricas ⏳ Etapa 2)
+## 7. Metodologia ✅
 - Dados divididos antes de qualquer ajuste, em treino / validação / teste:
   - estratificada: 1.773.061 / 443.266 / 554.082 transações (0,30% de fraude nas três)
   - temporal: dias 1–19 / 20–23 / 24–31 → 2.628.113 (0,19%) / 60.569 (1,62%) / 81.727 (2,59%)
@@ -72,27 +72,64 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   LR, como na proposta (ela não captura o pico da madrugada; ver slide 8).
 - Custo: o SMOTE dobra o treino (de 1,77 para 3,54 milhões de linhas na estratificada). Tempo total de
   34 min; os RF com SMOTE levaram 554 s e 901 s e geraram arquivos de 439 e 647 MB. As LR levaram até 10 s.
-- Métricas (Etapa 2): PR-AUC (principal), ROC-AUC, Precision, Recall, F1, matriz de confusão e limite.
+- Métricas no teste: PR-AUC (principal), ROC-AUC, Precision, Recall, F1 e matriz de confusão.
+- Limite de decisão: o de maior F1 na **validação** (e não 0,5); o teste não participa da escolha.
+- Modelo da aplicação: maior PR-AUC na validação entre os 4 da divisão estratificada (decisão do grupo).
+  Se um modelo com arquivo menor ficasse a menos de 0,01 dele, ele seria o escolhido. A regra foi fixada antes de rodar.
 - Origem: `python -m src.train`, executado em 23/10/2026 (8 CPUs); tempos em `reports/tempos_treino.csv`.
 
-## 8. Resultados ⏳
-- Tabela comparativa dos modelos (aguarda `src.train` e `src.evaluate`).
-- Curva Precision × Recall e limite escolhido.
-- Importância das variáveis do Random Forest.
-- Explicar a diferença RF × LR à luz do slide 5: o risco por hora não é linear (sobe de madrugada),
-  o que favorece o Random Forest.
+## 8. Resultados ✅
+- Figuras: `reports/figures/curvas_precision_recall.png`, `matrizes_confusao.png` e `importancia_variaveis.png`.
+- Teste, no limite escolhido na validação. As divisões não se comparam entre si (slide 6).
+
+  | Divisão (fraude no teste = PR-AUC aleatória) | Modelo | PR-AUC | ROC-AUC | Precision | Recall | F1 |
+  |---|---|---|---|---|---|---|
+  | Estratificada (0,30%) | RF + class_weight | **0,362** | 0,847 | 0,565 | 0,327 | 0,415 |
+  | | RF + SMOTE | 0,286 | 0,837 | 0,483 | 0,303 | 0,372 |
+  | | LR + class_weight | 0,021 | 0,811 | 0,056 | 0,089 | 0,069 |
+  | | LR + SMOTE | 0,021 | 0,811 | 0,057 | 0,089 | 0,069 |
+  | Temporal (2,59%) | RF + class_weight | **0,471** | 0,832 | 0,629 | 0,429 | 0,510 |
+  | | RF + SMOTE | 0,431 | 0,837 | 0,633 | 0,384 | 0,478 |
+  | | LR + class_weight | 0,201 | 0,810 | 0,291 | 0,305 | 0,298 |
+  | | LR + SMOTE | 0,201 | 0,810 | 0,292 | 0,304 | 0,298 |
+
+- **RF × LR:** o RF vence nas duas divisões (PR-AUC 0,362 × 0,021 e 0,471 × 0,201). A LR trata `hour` e `amount`
+  como retas e não captura o pico da madrugada (slide 5). Na estratificada, ela fica só cerca de 7 vezes acima do
+  palpite aleatório (0,003).
+- **A ROC-AUC esconde a diferença:** fica entre 0,81 e 0,85 para todos os modelos. Com tão pouca fraude,
+  a PR-AUC é a métrica que separa os modelos.
+- **class_weight × SMOTE:** no RF, o class_weight foi melhor nas duas divisões (0,362 × 0,286; 0,471 × 0,431),
+  com arquivo 7 a 8 vezes menor e treino 2 a 3 vezes mais rápido (slide 7). Na LR, os dois dão praticamente o
+  mesmo resultado (as curvas se sobrepõem na figura).
+- **Limite:** com 0,5, o RF + class_weight (estratificada) acha 64% das fraudes, mas só 1,7% dos alertas são
+  fraude (61.330 alarmes falsos). No limite de 0,989, escolhido na validação, a Precision sobe para 56,5% e o
+  Recall cai para 32,7% (F1 de 0,033 para 0,415). Os limites ficam altos (0,82 a 0,99) porque o class_weight e
+  o SMOTE inflam a probabilidade de fraude.
+- **Variáveis (RF + class_weight, estratificada):** `amount` 60%, `hour` 27%, `type` 13%. Com SMOTE, `hour`
+  sobe para 39%. É a importância por impureza (MDI), que tende a favorecer variáveis contínuas.
+- Validação e teste ficaram próximos na estratificada (PR-AUC 0,346 × 0,362): o limite não foi "decorado".
+- Origem: `python -m src.evaluate`, executado em 23/10/2026; tabela completa em `reports/metricas.csv`
+  e importâncias em `reports/importancia_variaveis.csv`.
 
 ## 9. Aplicação ⏳
 - Demonstração: o usuário informa tipo, valor e hora e recebe a classe, a probabilidade e as
   variáveis mais importantes.
 - Aviso na tela: ferramenta de apoio à análise, não de bloqueio.
 
-## 10. Ética e limitações ✅ (resultados de FP/FN ⏳)
+## 10. Ética e limitações ✅
 - LGPD, art. 20: direito de pedir revisão de decisões tomadas unicamente por tratamento automatizado,
   por isso a ferramenta é só de apoio. Não dizer que a lei exige revisão por um humano: essa parte
   foi retirada pela Lei nº 13.853/2019.
-- Falsos positivos prejudicam clientes legítimos; falsos negativos deixam fraudes passarem
-  (⏳ números da matriz de confusão).
+- Falsos positivos (FP) prejudicam clientes legítimos; falsos negativos (FN) deixam fraudes passarem.
+  Modelo da aplicação (RF + class_weight, estratificada), no teste:
+  - no limite de 0,989: 414 FP (0,07% das 552.439 legítimas; 43% dos 952 alertas) e 1.105 FN
+    (67% das 1.643 fraudes passam);
+  - no limite de 0,5: os FN caem para 589, mas os FP sobem para 61.330 (11% das legítimas).
+  - O limite decide quem paga o erro: o cliente incomodado ou a vítima da fraude. O F1 dá o mesmo peso
+    aos dois; um banco poderia pesar de outro jeito.
+  - Só com tipo, valor e hora, a maioria das fraudes passa. É mais um motivo para a ferramenta ser apoio,
+    e não decisão.
+  - Origem: `python -m src.evaluate` (23/10/2026), `reports/metricas.csv`.
 - A base é simulada e não brasileira, tem artefatos do simulador (teto de 10 milhões nas fraudes,
   queda das legítimas a partir do dia 18) e a proporção de fraude muda ao longo do tempo (slide 6).
 - Alternativa considerada: IEEE-CIS Fraud Detection (Vesta/Kaggle), com dados reais de e-commerce.
@@ -100,10 +137,17 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   na aplicação), trata de outro tipo de fraude (compra com cartão) e também não é brasileira.
   Além disso, as regras da competição limitam o uso a fins não comerciais.
 
-## 11. Conclusão ⏳
-- Responder: qual modelo e qual forma de tratar o desbalanceamento funcionaram melhor, e o que
-  isso significa na prática.
-- Próximos passos possíveis: base real, mais variáveis, validação com especialistas.
+## 11. Conclusão ✅
+- O melhor foi o Random Forest com `class_weight`, nas duas divisões. Ele vai para a aplicação
+  (divisão estratificada, limite 0,989).
+- O RF capta padrões que não são lineares (a hora da madrugada, faixas de valor); a LR não capta.
+- O class_weight superou o SMOTE no RF e saiu muito mais barato (62 MB × 439 MB; 236 s × 554 s).
+- Na prática: no teste estratificado, o modelo acerta 56,5% dos alertas e acha 32,7% das fraudes
+  (PR-AUC de 0,362, contra 0,003 do palpite aleatório). Ajuda a priorizar a análise, mas não substitui
+  o analista.
+- Base simulada e não brasileira: os números valem para o PaySim, não para o Pix.
+- Próximos passos possíveis: base real, mais variáveis (histórico da conta, por exemplo), validação com especialistas.
+- Origem: `python -m src.evaluate` (23/10/2026) e `reports/tempos_treino.csv`.
 
 ---
 
