@@ -9,25 +9,69 @@
 <body>
   <main>
     <h1>Detecção de Fraudes</h1>
-    <p class="aviso">Ferramenta de apoio à análise. Não usar isoladamente para decisões reais.</p>
 
-    <form id="form">
-      <label>Tipo
-        <select name="type">
-          <option value="TRANSFER">TRANSFER</option>
-          <option value="CASH_OUT">CASH_OUT</option>
-        </select>
-      </label>
-      <label>Valor
-        <input name="amount" type="number" step="0.01" min="0.01" required>
-      </label>
-      <label>Hora do dia (0-23)
-        <input name="hour" type="number" min="0" max="23" required>
-      </label>
-      <button type="submit">Analisar</button>
-    </form>
+    <div class="aviso" role="note">
+      <strong>Ferramenta de apoio à análise, não de bloqueio nem de acusação.</strong>
+      O resultado indica transações para um analista revisar. O titular pode pedir a revisão de
+      decisões tomadas unicamente por tratamento automatizado (LGPD, art. 20).
+    </div>
+    <p class="nota">
+      Modelo treinado com a base PaySim, que é <strong>simulada e não brasileira</strong>.
+      Os resultados valem para essa base, não para transações reais (como o Pix).
+    </p>
 
-    <pre id="resultado"></pre>
+    <section class="cartao">
+      <h2>Nova análise</h2>
+      <form id="form">
+        <label>Tipo
+          <select name="type">
+            <option value="TRANSFER">TRANSFER</option>
+            <option value="CASH_OUT">CASH_OUT</option>
+          </select>
+        </label>
+        <label>Valor
+          <input name="amount" type="number" step="0.01" min="0.01" required>
+        </label>
+        <label>Hora do dia (0-23)
+          <input name="hour" type="number" min="0" max="23" required>
+        </label>
+        <button type="submit">Analisar</button>
+      </form>
+      <p id="erro" class="erro" hidden></p>
+    </section>
+
+    <section id="resultado" class="cartao" hidden>
+      <h2>Resultado</h2>
+      <p><span id="classe" class="selo"></span></p>
+      <p class="escore">Escore de fraude do modelo: <strong id="probabilidade"></strong></p>
+      <p class="nota">
+        A transação é marcada como potencial fraude quando o escore chega ao limite de
+        <strong id="limite"></strong>, escolhido na validação (maior F1). O escore não é a chance real de
+        fraude: o treino com <code>class_weight</code> dá mais peso às fraudes e infla esse número.
+      </p>
+
+      <h3>Variáveis mais importantes</h3>
+      <ul id="importancias" class="barras"></ul>
+      <p class="nota">
+        Importâncias globais do Random Forest (o quanto cada variável pesa no modelo como um todo),
+        e não o motivo desta transação em particular.
+      </p>
+    </section>
+
+    <section class="cartao">
+      <h2>Últimas análises</h2>
+      <div class="tabela">
+        <table>
+          <thead>
+            <tr>
+              <th>Data/hora</th><th>Tipo</th><th>Valor</th><th>Hora</th><th>Escore</th><th>Classe</th>
+            </tr>
+          </thead>
+          <tbody id="historico"></tbody>
+        </table>
+      </div>
+      <p id="historico-vazio" class="nota" hidden>Nenhuma análise ainda.</p>
+    </section>
   </main>
   <script src="/static/app.js"></script>
 </body>

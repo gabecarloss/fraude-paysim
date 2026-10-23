@@ -7,13 +7,46 @@ body {
 }
 
 main {
-  max-width: 480px;
+  max-width: 760px;
   margin: 0 auto;
 }
 
+h1 {
+  margin-top: 0;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin-top: 0;
+}
+
+h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Aviso ético em destaque (LGPD, art. 20) */
 .aviso {
+  background: #fff4d6;
+  border: 1px solid #e0b43c;
+  border-left: 6px solid #c98a00;
+  border-radius: 6px;
+  padding: 0.9rem 1rem;
+  line-height: 1.45;
+}
+
+.nota {
   font-size: 0.9rem;
-  color: #666;
+  color: #555;
+  line-height: 1.45;
+}
+
+.cartao {
+  background: #fff;
+  border: 1px solid #dcdde1;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-top: 1.25rem;
 }
 
 form {
@@ -31,7 +64,87 @@ input, select, button {
   padding: 0.5rem;
 }
 
-#resultado {
-  margin-top: 1.5rem;
-  white-space: pre-wrap;
+button {
+  cursor: pointer;
+}
+
+.erro {
+  color: #a1260d;
+  font-weight: 600;
+}
+
+/* Classe prevista */
+.selo {
+  display: inline-block;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.selo.fraude {
+  background: #fde3dc;
+  color: #a1260d;
+}
+
+.selo.legitima {
+  background: #dcf2e6;
+  color: #17643c;
+}
+
+.escore {
+  font-size: 1.1rem;
+}
+
+/* Barras das importâncias */
+.barras {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.barras li {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 3rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trilho {
+  background: #eceef2;
+  border-radius: 4px;
+  height: 0.9rem;
+}
+
+.barra {
+  display: block;
+  height: 100%;
+  background: #2a78d6;
+  border-radius: 4px;
+}
+
+/* Histórico: a tabela rola dentro do contêiner em telas estreitas */
+.tabela {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid #eceef2;
+  white-space: nowrap;
+}
+
+.linha-fraude td:last-child {
+  color: #a1260d;
+  font-weight: 600;
 }

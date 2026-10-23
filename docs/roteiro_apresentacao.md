@@ -111,10 +111,26 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
 - Origem: `python -m src.evaluate`, executado em 23/10/2026; tabela completa em `reports/metricas.csv`
   e importâncias em `reports/importancia_variaveis.csv`.
 
-## 9. Aplicação ⏳
-- Demonstração: o usuário informa tipo, valor e hora e recebe a classe, a probabilidade e as
-  variáveis mais importantes.
-- Aviso na tela: ferramenta de apoio à análise, não de bloqueio.
+## 9. Aplicação ✅
+- Fluxo: tela (HTML/CSS/JS) → FastAPI `/predict` → modelo (RF + class_weight, carregado uma vez) →
+  limite 0,9886 → resultado na tela e análise salva no SQLite (`/historico` mostra as últimas).
+- A tela mostra a classe, o escore em %, o limite e as importâncias, além do aviso em destaque: ferramenta
+  de apoio à análise, não de bloqueio (LGPD, art. 20). Também avisa que a base é simulada e não brasileira.
+- Roteiro da demonstração (escores reais devolvidos pela API):
+  1. CASH_OUT, 50.000, 14h → **legítima**, escore 0,00%. É um perfil comum: só 0,07% de fraude nessa faixa da base.
+  2. TRANSFER, 1.000.000, 5h → **potencial fraude**, escore 99,61%. Madrugada e valor alto (slide 5): 54,9% de
+     fraude nessa faixa.
+  3. (Opcional) CASH_OUT, 1.000.000, 14h → **potencial fraude**, escore 99,35%, mas a faixa tem só 17,7% de fraude.
+     Mostra que o escore não é a chance real e puxa a discussão de falsos positivos (slide 10).
+  4. Hora 25 ou valor negativo → recusados pela API (erro 422), sem chegar ao modelo nem ao banco.
+- Pontos a falar:
+  - o escore é inflado pelo class_weight (por isso o limite é alto);
+  - as importâncias são globais (`amount` 60%, `hour` 27%, `type` 13%), não o motivo daquela transação;
+    explicar cada transação exigiria outra biblioteca (ex.: SHAP), fora do escopo;
+  - o histórico fica guardado para revisão por um analista.
+- Origem: `uvicorn app.main:app --reload`, testado em 23/10/2026 (resposta em cerca de 0,15 s por análise).
+  As taxas por faixa vêm do parquet (`data/processed/transacoes.parquet`): CASH_OUT, 12–16h, 20 mil–100 mil;
+  TRANSFER, 3–6h, 500 mil–2 milhões; CASH_OUT, 12–16h, 800 mil–2 milhões.
 
 ## 10. Ética e limitações ✅
 - LGPD, art. 20: direito de pedir revisão de decisões tomadas unicamente por tratamento automatizado,

@@ -48,3 +48,7 @@ DIVISAO_APLICACAO = "estratificada"
 TOLERANCIA_PR_AUC = 0.01
 # Arquivo lido pela aplicação: pipeline + limite de decisão + importâncias.
 MODELO_APLICACAO = MODELS_DIR / "modelo_aplicacao.joblib"
+
+# Banco SQLite da aplicação (Etapa 3): guarda cada análise feita pela interface.
+# Criado na primeira execução; não é versionado (*.db no .gitignore).
+BANCO_ANALISES = ROOT / "data" / "analises.db"
