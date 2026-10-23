@@ -11,11 +11,14 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
 - Detecção de Transações Financeiras Fraudulentas com Machine Learning
 - Gabriel Pedro Francio e Gabriel Carlos
 
-## 2. Problema e motivação ⚠️
-- O Pix virou o principal meio de pagamento do Brasil, e as perdas com fraude são altas.
+## 2. Problema e motivação ✅
+- Pix: quase 80 bilhões de transações em 2025, alta de 25,7% sobre 2024 (BCB, Relatório de Gestão
+  do Pix 2023-2025, p. 14). Dizer "meio de pagamento preferido dos brasileiros" (p. 22) ou "central
+  para o varejo" (p. 15), e não "principal": o relatório não usa essa palavra.
+- Golpes: perdas de R$ 10,1 bilhões em 2024, contra R$ 8,6 bilhões em 2023, segundo a Febraban
+  (Poder360, 12 mar. 2025).
 - Objetivo: protótipo que classifica transações como legítimas ou potencialmente fraudulentas.
-- ⚠️ Os números da proposta (quase 80 bi de transações Pix em 2025, segundo o BCB; R$ 10,1 bi de
-  perdas em 2024, segundo a Febraban/Poder360) precisam ser conferidos nas fontes antes de entrar no slide.
+- Origem: fontes conferidas em 22/10/2026 (ver "Referências" no fim deste arquivo).
 
 ## 3. Base de dados ✅
 - PaySim (Kaggle): simulada a partir de dados reais de um serviço de dinheiro móvel africano.
@@ -55,11 +58,22 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   comparados dentro de cada divisão, não uma divisão contra a outra.
 - Origem: `notebooks/01_analise_exploratoria.ipynb`, executado em 22/10/2026.
 
-## 7. Metodologia ⏳
-- Divisão treino/teste estratificada e temporal, feita antes de qualquer ajuste.
-- Random Forest (principal) × Regressão Logística (comparação).
-- Desbalanceamento: `class_weight` × SMOTE, só no treino e dentro de um Pipeline.
-- Métricas: PR-AUC (principal), ROC-AUC, Precision, Recall, F1, matriz de confusão e limite de decisão.
+## 7. Metodologia ✅ (métricas ⏳ Etapa 2)
+- Dados divididos antes de qualquer ajuste, em treino / validação / teste:
+  - estratificada: 1.773.061 / 443.266 / 554.082 transações (0,30% de fraude nas três)
+  - temporal: dias 1–19 / 20–23 / 24–31 → 2.628.113 (0,19%) / 60.569 (1,62%) / 81.727 (2,59%)
+- Validação (só do treino) serve para escolher o limite de decisão; o teste só é usado no fim.
+- 8 modelos = 2 algoritmos × 2 balanceamentos × 2 divisões:
+  - Random Forest (principal) × Regressão Logística (comparação)
+  - `class_weight="balanced"` × SMOTE (equilibra 1:1); nunca os dois juntos
+- Tudo num Pipeline: one-hot em `type`, padronização de `amount` e `hour`, SMOTE (só no treino), modelo.
+- Hiperparâmetros simples, sem busca: RF com 100 árvores e folhas com no mínimo 50 transações; LR padrão.
+- Decisões do grupo: sem amostragem das legítimas (usamos o treino inteiro); `hour` numérico também na
+  LR, como na proposta (ela não captura o pico da madrugada; ver slide 8).
+- Custo: o SMOTE dobra o treino (de 1,77 para 3,54 milhões de linhas na estratificada). Tempo total de
+  34 min; os RF com SMOTE levaram 554 s e 901 s e geraram arquivos de 439 e 647 MB. As LR levaram até 10 s.
+- Métricas (Etapa 2): PR-AUC (principal), ROC-AUC, Precision, Recall, F1, matriz de confusão e limite.
+- Origem: `python -m src.train`, executado em 23/10/2026 (8 CPUs); tempos em `reports/tempos_treino.csv`.
 
 ## 8. Resultados ⏳
 - Tabela comparativa dos modelos (aguarda `src.train` e `src.evaluate`).
@@ -74,7 +88,9 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
 - Aviso na tela: ferramenta de apoio à análise, não de bloqueio.
 
 ## 10. Ética e limitações ✅ (resultados de FP/FN ⏳)
-- LGPD, art. 20: direito à revisão de decisões automatizadas, por isso a ferramenta é só de apoio.
+- LGPD, art. 20: direito de pedir revisão de decisões tomadas unicamente por tratamento automatizado,
+  por isso a ferramenta é só de apoio. Não dizer que a lei exige revisão por um humano: essa parte
+  foi retirada pela Lei nº 13.853/2019.
 - Falsos positivos prejudicam clientes legítimos; falsos negativos deixam fraudes passarem
   (⏳ números da matriz de confusão).
 - A base é simulada e não brasileira, tem artefatos do simulador (teto de 10 milhões nas fraudes,
@@ -82,9 +98,42 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
 - Alternativa considerada: IEEE-CIS Fraud Detection (Vesta/Kaggle), com dados reais de e-commerce.
   Não foi usada porque a maior parte das variáveis é anonimizada (o usuário não conseguiria preenchê-las
   na aplicação), trata de outro tipo de fraude (compra com cartão) e também não é brasileira.
-  ⏳ Incluir a referência em ABNT a partir da página oficial da competição.
+  Além disso, as regras da competição limitam o uso a fins não comerciais.
 
 ## 11. Conclusão ⏳
 - Responder: qual modelo e qual forma de tratar o desbalanceamento funcionaram melhor, e o que
   isso significa na prática.
 - Próximos passos possíveis: base real, mais variáveis, validação com especialistas.
+
+---
+
+## Referências (conferidas em 22/10/2026)
+
+Já corrigidas em relação à proposta. As que entram nos slides vão para um slide final de referências.
+
+- BANCO CENTRAL DO BRASIL. **Relatório de Gestão do Pix 2023-2025**. Brasília: BCB, 2026. Disponível em:
+  https://www.bcb.gov.br/content/estabilidadefinanceira/pix/relatorio_de_gestao_pix/relatorio_gestao_pix_2026.pdf.
+  Acesso em: 22 out. 2026.
+- BRASIL. Lei nº 13.709, de 14 de agosto de 2018. Lei Geral de Proteção de Dados Pessoais (LGPD).
+  **Diário Oficial da União**, Brasília, DF, 15 ago. 2018.
+- BREIMAN, Leo. Random forests. **Machine Learning**, v. 45, n. 1, p. 5-32, 2001. DOI: 10.1023/A:1010933404324.
+- CHAWLA, Nitesh V. *et al*. SMOTE: synthetic minority over-sampling technique. **Journal of Artificial
+  Intelligence Research**, v. 16, p. 321-357, 2002. DOI: 10.1613/jair.953.
+- IEEE COMPUTATIONAL INTELLIGENCE SOCIETY. **IEEE-CIS Fraud Detection**. [S. l.]: Kaggle, 2019. Disponível em:
+  https://www.kaggle.com/competitions/ieee-fraud-detection. Acesso em: 22 out. 2026.
+- LE BORGNE, Yann-Aël *et al*. **Reproducible machine learning for credit card fraud detection**: practical
+  handbook. Bruxelas: Université Libre de Bruxelles, 2022. Disponível em:
+  https://fraud-detection-handbook.github.io/fraud-detection-handbook/. Acesso em: 22 out. 2026.
+  (O livro *aplica* o reamostramento só nos dados de treino, com Pipeline do imblearn; não traz uma
+  frase dizendo que isso é obrigatório.)
+- LOPEZ-ROJAS, Edgar. **Synthetic Financial Datasets For Fraud Detection**. Kaggle, 2017. Disponível em:
+  https://www.kaggle.com/datasets/ealaxi/paysim1. Acesso em: 22 out. 2026.
+  (As contagens 6.362.620 / 8.213 vêm da nossa leitura do CSV, não da descrição da base. A descrição
+  fala em 744 passos, cerca de 30 dias, mas o CSV vai do step 1 ao 743.)
+- LOPEZ-ROJAS, Edgar Alonso; ELMIR, Ahmad; AXELSSON, Stefan. PaySim: a financial mobile money simulator
+  for fraud detection. In: EUROPEAN MODELING AND SIMULATION SYMPOSIUM, 28., 2016, Larnaca.
+  **Proceedings** [...]. 2016. p. 249-255. ISBN 978-88-97999-76-8.
+- PODER360. Golpes causaram prejuízo de R$ 10,1 bi em 2024, diz Febraban. **Poder360**, Brasília,
+  12 mar. 2025. Disponível em:
+  https://www.poder360.com.br/poder-economia/golpes-causaram-prejuizo-de-r-101-bi-em-2024-diz-febraban/.
+  Acesso em: 22 out. 2026.

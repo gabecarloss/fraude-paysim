@@ -30,3 +30,10 @@ TEST_SIZE = 0.2
 # Decisão do grupo após a análise exploratória: manter o corte. As legítimas caem muito a partir
 # do dia 18, então o teste tem ~2,6% de fraude e o treino ~0,23% (registrado como limitação).
 TEMPORAL_SPLIT_STEP = 24 * 23
+
+# Validação: parte do TREINO separada para escolher o limite de decisão (Etapa 2) sem tocar no teste.
+# Estratificada: 20% do treino, mantendo a proporção de fraude.
+VALIDATION_SIZE = 0.2
+# Temporal: os últimos dias do treino. Ajuste com step <= este valor (dias 1 a 19),
+# validação nos dias 20 a 23 (60.569 transações, 980 fraudes).
+VALIDATION_TEMPORAL_STEP = 24 * 19

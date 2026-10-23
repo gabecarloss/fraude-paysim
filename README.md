@@ -44,6 +44,10 @@ python -m src.evaluate         # gera métricas em reports/
 uvicorn app.main:app --reload  # abre a aplicação em http://127.0.0.1:8000
 ```
 
+O `src.train` treina 8 modelos e levou cerca de 34 minutos numa máquina com 8 núcleos
+(tempos em `reports/tempos_treino.csv`). Os modelos ocupam cerca de 1,2 GB em `models/`, quase
+tudo nos dois Random Forest com SMOTE.
+
 ## Decisões principais
 
 - Apenas transações `TRANSFER` e `CASH_OUT` (as únicas com fraude).
