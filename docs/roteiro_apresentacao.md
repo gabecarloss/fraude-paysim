@@ -76,7 +76,7 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
 - Limite de decisão: o de maior F1 na **validação** (e não 0,5); o teste não participa da escolha.
 - Modelo da aplicação: maior PR-AUC na validação entre os 4 da divisão estratificada (decisão do grupo).
   Se um modelo com arquivo menor ficasse a menos de 0,01 dele, ele seria o escolhido. A regra foi fixada antes de rodar.
-- Origem: `python -m src.train`, executado em 23/10/2026 (8 CPUs); tempos em `reports/tempos_treino.csv`.
+- Origem: `python -m src.train`, executado em 23/10/2026 (8 CPUs); tempos em `reports/tempos_treino_2026-10-23.csv`.
 
 ## 8. Resultados ✅
 - Figuras: `reports/figures/curvas_precision_recall.png`, `matrizes_confusao.png` e `importancia_variaveis.png`.
@@ -116,13 +116,12 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   Na interface, escolher uma e clicar em Analisar. Comparar transferência de um milhão
   às 5h e às 14h; depois comparar saque e transferência com o mesmo valor e horário.
   Não há rótulo verdadeiro ou escore pré-programado. A previsão vem do classificador.
-  ⏳ Conferir as respostas no artefato treinado antes da apresentação: o arquivo
-  `modelo_aplicacao.joblib` não está disponível neste ambiente.
-- ⏳ Integração de LLM local para a demonstração: implementada via Ollama, ainda sem
-  execução ponta a ponta neste ambiente (dependências completas e artefato do classificador ausentes).
-  A LLM gera uma entrada fictícia, o apresentador revisa e o Random Forest classifica.
+  ✅ Em 23/11/2026, o artefato foi regenerado com os scripts existentes e os exemplos
+  CASH_OUT, 50.000, 14h e TRANSFER, 1.000.000, 5h foram classificados pela interface.
+- ✅ Integração de LLM local: geração pela interface com `qwen2.5:1.5b`, classificação
+  e histórico confirmados pelo usuário em 23/11/2026.
+  A LLM gera uma entrada fictícia, o usuário revisa e o Random Forest classifica.
   Não existe rótulo verdadeiro para medir acertos; os exemplos não entram no treinamento.
-  Preparar modelo local e exemplos manuais conferidos antes da apresentação.
 - Teste direto da API local do Ollama em 23/11/2026: instalado `qwen2.5:1.5b` e
   recebida entrada fictícia válida (`TRANSFER`, valor 500, hora 23). O primeiro teste
   gerou texto repetitivo e JSON incompleto; ajustados temperatura, penalidade de repetição
@@ -133,7 +132,15 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   da interface e o bloqueio de modelos remotos antes de enviar o cenário ao Ollama.
   Passaram cinco testes Python e três cenários da interface; a função real do gerador
   retornou `TRANSFER`, valor 1000 e hora 2 usando `qwen2.5:1.5b` local.
-  Classificação e integração completa continuam pendentes; nenhum escore foi calculado.
+  Na sequência, o usuário confirmou o fluxo completo na aplicação. Capturas do histórico:
+  CASH_OUT, 50.000, 14h → legítima (0,00%, arredondado); TRANSFER, 1.000, 0h → legítima
+  (88,55%); TRANSFER, 1.000.000, 5h → potencial fraude (99,61%).
+- Continuidade: o treinamento foi repetido porque os artefatos ignorados pelo Git
+  estavam ausentes nesta cópia. Os scripts e a metodologia anteriores foram reutilizados,
+  sem alterar `src/`, e as métricas foram reproduzidas nas quatro casas registradas.
+  Tempos da nova execução: 633,8 s de ajuste somados (`reports/tempos_treino.csv`).
+  A execução anterior permanece documentada; tempos preservados em
+  `reports/tempos_treino_2026-10-23.csv`. A nova execução não substitui a contribuição anterior.
 - Fluxo: tela (HTML/CSS/JS) → FastAPI `/predict` → modelo (RF + class_weight, carregado uma vez) →
   limite 0,9886 → resultado na tela e análise salva no SQLite (`/historico` mostra as últimas).
 - A tela mostra a classe, o escore em %, o limite e as importâncias, além do aviso em destaque: ferramenta
@@ -185,7 +192,7 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   o analista.
 - Base simulada e não brasileira: os números valem para o PaySim, não para o Pix.
 - Próximos passos possíveis: base real, mais variáveis (histórico da conta, por exemplo), validação com especialistas.
-- Origem: `python -m src.evaluate` (23/10/2026) e `reports/tempos_treino.csv`.
+- Origem: `python -m src.evaluate` (23/10/2026) e `reports/tempos_treino_2026-10-23.csv`.
 
 ---
 

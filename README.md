@@ -46,9 +46,47 @@ python -m src.evaluate         # gera métricas em reports/
 uvicorn app.main:app --reload  # abre a aplicação em http://127.0.0.1:8000
 ```
 
-O `src.train` treina 8 modelos e levou cerca de 34 minutos numa máquina com 8 núcleos
-(tempos em `reports/tempos_treino.csv`). Os modelos ocupam cerca de 1,2 GB em `models/`, quase
+O `src.train` treina 8 modelos. A execução original levou cerca de 34 minutos numa máquina
+com 8 núcleos (`reports/tempos_treino_2026-10-23.csv`). Na nova execução de 23/11/2026,
+a soma dos tempos de ajuste registrados foi de 633,8 segundos, cerca de 10,6 minutos
+(`reports/tempos_treino.csv`); isso não inclui preparação, avaliação e gravação dos arquivos.
+Os tempos dependem da máquina e do ambiente. Os modelos ocupam cerca de 1,2 GB em `models/`, quase
 tudo nos dois Random Forest com SMOTE.
+
+## Continuidade do trabalho e alterações realizadas
+
+O trabalho anterior do grupo foi mantido: preparação do PaySim, análise exploratória,
+divisões estratificada e temporal, oito pipelines de treinamento, avaliação, escolha do
+limite, API de classificação e histórico SQLite. Os scripts de modelagem em `src/`
+não foram alterados nesta etapa. Também foram preservadas as três entradas (`type`,
+`amount`, `hour`), os algoritmos, os balanceamentos e os critérios de seleção.
+
+As alterações acrescentaram duas formas de fornecer entradas fictícias à aplicação:
+um gerador com Ollama local e seis exemplos fixos selecionáveis. Isso permite verificar
+o fluxo da interface sem digitar cada transação. A LLM só gera entradas; a classificação
+continua sendo feita pelo pipeline treinado anteriormente definido pelo grupo.
+Também foram corrigidos o tratamento de importâncias ausentes, as mensagens de falha
+de comunicação e a rejeição de modelos remotos no gerador, com testes de regressão.
+
+### Por que o treinamento foi executado novamente
+
+Nesta cópia do repositório, os dados e os arquivos treinados estavam ausentes: são
+ignorados pelo Git. Isso não significa que o treinamento anterior estivesse errado
+ou que o trabalho precisasse ser substituído. O `modelo_aplicacao.joblib` era necessário
+para executar e testar a aplicação, mas não estava disponível para cópia.
+
+Por isso, o grupo baixou novamente o CSV original do PaySim e executou os scripts
+existentes de preparação, treinamento e avaliação em 23/11/2026. O objetivo foi regenerar
+os artefatos locais com a metodologia existente. Não houve treinamento com exemplos
+da LLM, troca de base ou adaptação para o Brasil.
+
+A nova avaliação reproduziu as métricas anteriormente registradas, nas quatro casas
+decimais apresentadas. O escolhido continuou sendo `rf_classweight_estratificada`, com
+PR-AUC de validação 0,3464, PR-AUC de teste 0,3619 e limite 0,9886. A Precision no teste
+foi 0,5651 e o Recall 0,3274. Origem: execução de `src.evaluate` e `reports/metricas.csv`.
+O arquivo `models/modelo_aplicacao.joblib` foi regenerado e continua fora do Git.
+Os tempos da execução anterior foram preservados em arquivo separado para manter
+a origem dos números históricos do trabalho.
 
 ## Decisões principais
 
@@ -125,14 +163,18 @@ sem os oito modelos treinados que ela carrega.
   inválidas, indisponibilidade do Ollama, importâncias ausentes e falhas de comunicação.
 - A função real `gerar_cenario` também foi executada com `qwen2.5:1.5b`, retornando
   `TRANSFER`, valor 1000 e hora 2. O endpoint e o classificador não participaram desse teste.
-- Esses testes foram executados com Python 3.15 e FastAPI instalado em `.venv`;
-  isso não valida a compatibilidade da pilha completa de treinamento nessa versão.
-- Pendente nesta etapa: executar o backend com dependências instaladas e o artefato
-  treinado, verificar `/gerar-cenario`, `/predict` e `/historico` e validar os erros de entrada.
-  Nenhuma previsão dos novos exemplos foi executada nesta etapa.
+- Os testes automatizados foram executados com Python 3.15 na `.venv`. Depois,
+  o usuário instalou as dependências e executou preparação, treino e avaliação.
+- Teste manual em 23/11/2026, confirmado pelo usuário: geração com `qwen2.5:1.5b`
+  pela interface, classificação e consulta das análises no histórico.
+  As capturas do histórico mostram `CASH_OUT`, 50.000, 14h → legítima (0,00%, arredondado);
+  `TRANSFER`, 1.000, 0h → legítima (88,55%); e `TRANSFER`, 1.000.000, 5h → potencial
+  fraude (99,61%). São saídas do classificador para entradas fictícias, sem rótulo verdadeiro.
+- Pendente: repetir os casos de entrada inválida na API em execução. Os testes
+  automatizados cobrem cenários específicos e não garantem ausência de todos os erros.
 
-Os resultados em `reports/` e os testes anteriores registrados no roteiro são de
-execuções anteriores do grupo; não foram reproduzidos ao implementar o gerador.
+O roteiro preserva as análises e execuções anteriores do grupo. Os testes manuais
+atuais confirmam o fluxo básico completo; não demonstram validade para transações reais.
 
 Para repetir os testes de regressão na raiz do projeto, com as dependências instaladas:
 

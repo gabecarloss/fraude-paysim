@@ -1,0 +1,9 @@
+modelo,balanceamento,divisao,linhas_treino,segundos,arquivo_mb
+rf,classweight,estratificada,1773061,236.4,61.8
+rf,smote,estratificada,1773061,553.9,438.5
+lr,classweight,estratificada,1773061,6.3,0.0
+lr,smote,estratificada,1773061,8.7,0.4
+rf,classweight,temporal,2628113,307.6,76.1
+rf,smote,temporal,2628113,900.7,646.7
+lr,classweight,temporal,2628113,6.1,0.0
+lr,smote,temporal,2628113,10.0,0.4
