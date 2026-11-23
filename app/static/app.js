@@ -101,4 +101,36 @@ form.addEventListener("submit", async (event) => {
   carregarHistorico();
 });
 
-carregarHistorico();
+carregarHistorico().catch(() => {
+  document.getElementById("historico-vazio").hidden = false;
+  document.getElementById("historico-vazio").textContent = "Não foi possível carregar o histórico.";
+});
+
+document.getElementById("form-gerador").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const botao = document.getElementById("botao-gerador");
+  const estado = document.getElementById("estado-gerador");
+  const campos = new FormData(event.currentTarget);
+  botao.disabled = true;
+  estado.textContent = "Gerando no computador local. O primeiro carregamento pode demorar…";
+  try {
+    const resposta = await fetch("/gerar-cenario", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ modelo: campos.get("modelo"), pedido: campos.get("pedido") }),
+    });
+    const dados = await resposta.json();
+    if (!resposta.ok) {
+      throw new Error(typeof dados.detail === "string" ? dados.detail : "Confira o nome do modelo e o cenário.");
+    }
+    for (const campo of ["type", "amount", "hour"]) form.elements[campo].value = dados[campo];
+    resultado.hidden = true;
+    document.getElementById("origem-entrada").textContent =
+      `Entrada fictícia gerada por LLM local (${dados.modelo_gerador}). Não possui rótulo real de fraude.`;
+    estado.textContent = `Cenário fictício: ${dados.descricao} Revise os campos e clique em Analisar.`;
+  } catch (falha) {
+    estado.textContent = falha instanceof TypeError ? "Falha de conexão com a aplicação." : falha.message;
+  } finally {
+    botao.disabled = false;
+  }
+});

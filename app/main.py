@@ -4,6 +4,7 @@ Uso: uvicorn app.main:app --reload
 
 Endpoints:
 - POST /predict: analisa uma transação (type, amount, hour) e guarda o resultado no SQLite;
+- POST /gerar-cenario: gera uma entrada fictícia usando o Ollama local;
 - GET /historico: últimas análises guardadas;
 - GET /: interface (app/static).
 """
@@ -11,14 +12,13 @@ Endpoints:
 import sqlite3
 from contextlib import closing
 from datetime import datetime
-from typing import Literal
 
 import joblib
 import pandas as pd
 from fastapi import FastAPI, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from app.gerador import PedidoCenario, Transacao, gerar_cenario
 
 from src.config import BANCO_ANALISES, FEATURES, MODELO_APLICACAO, ROOT
 
@@ -67,12 +67,11 @@ def criar_tabela():
 criar_tabela()
 
 
-class Transacao(BaseModel):
-    # Entradas inválidas (hora 25, valor negativo, outro tipo) recebem erro 422 do próprio
-    # FastAPI, antes de chegar ao modelo e ao banco.
-    type: Literal["TRANSFER", "CASH_OUT"]
-    amount: float = Field(gt=0, allow_inf_nan=False)
-    hour: int = Field(ge=0, le=23)
+@app.post("/gerar-cenario")
+def gerar(pedido: PedidoCenario):
+    # Apenas gera a entrada: o usuário revisa e usa /predict para classificá-la.
+    # Não grava dados sintéticos no histórico nem nos arquivos de treinamento.
+    return gerar_cenario(pedido)
 
 
 @app.get("/")

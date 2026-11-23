@@ -21,7 +21,27 @@
     </p>
 
     <section class="cartao">
+      <h2>Gerar exemplo com LLM local</h2>
+      <p class="nota">Entradas fictícias para demonstração, sem rótulo verdadeiro de fraude.
+        Os exemplos usam os campos do PaySim: tipo, valor e hora. O classificador continua treinado nessa base.</p>
+      <form id="form-gerador">
+        <label>Modelo instalado no Ollama (nome exibido em ollama list)
+          <input name="modelo" maxlength="100" required placeholder="Nome do seu modelo local">
+        </label>
+        <label>Cenário desejado
+          <input name="pedido" minlength="5" maxlength="1000" required
+            value="Uma transferência fictícia de valor alto durante a madrugada">
+        </label>
+        <button id="botao-gerador" type="submit">Gerar transação fictícia</button>
+      </form>
+      <p id="estado-gerador" class="nota" role="status" aria-live="polite"></p>
+      <p class="nota">A geração preenche o formulário abaixo. Revise os campos e clique em Analisar.
+        O resultado é uma previsão, sem garantia de alerta e sem medir acertos da LLM.</p>
+    </section>
+
+    <section class="cartao">
       <h2>Nova análise</h2>
+      <p id="origem-entrada" class="nota" role="status"></p>
       <form id="form">
         <label>Tipo
           <select name="type">
