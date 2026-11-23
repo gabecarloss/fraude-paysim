@@ -2,6 +2,33 @@ const form = document.getElementById("form");
 const erro = document.getElementById("erro");
 const resultado = document.getElementById("resultado");
 
+async function carregarExemplos() {
+  const seletor = document.getElementById("exemplo-demo");
+  const estado = document.getElementById("estado-demo");
+  try {
+    const resposta = await fetch("/static/exemplos_demo.json");
+    if (!resposta.ok) throw new Error("Falha ao carregar os exemplos.");
+    const exemplos = await resposta.json();
+    seletor.replaceChildren(new Option("Escolha um exemplo", ""));
+    exemplos.forEach((exemplo, indice) => seletor.add(new Option(exemplo.descricao, String(indice))));
+    seletor.disabled = false;
+    seletor.addEventListener("change", () => {
+      if (seletor.value === "") return;
+      const exemplo = exemplos[Number(seletor.value)];
+      for (const campo of ["type", "amount", "hour"]) form.elements[campo].value = exemplo[campo];
+      resultado.hidden = true;
+      erro.hidden = true;
+      document.getElementById("origem-entrada").textContent =
+        `Exemplo fictício: ${exemplo.descricao}. Sem rótulo verdadeiro de fraude.`;
+      estado.textContent = "Formulário preenchido. Clique em Analisar para consultar o classificador real.";
+    });
+  } catch (falha) {
+    estado.textContent = "Não foi possível carregar os exemplos. Você pode preencher a transação manualmente.";
+  }
+}
+
+carregarExemplos();
+
 // Números no formato brasileiro. Escore com 2 casas para não parecer igual ao limite quando não é.
 const porcento = new Intl.NumberFormat("pt-BR", { style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const porcentoCurto = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 0 });

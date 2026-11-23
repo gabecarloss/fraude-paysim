@@ -21,6 +21,16 @@
     </p>
 
     <section class="cartao">
+      <h2>Exemplos prontos para a apresentação</h2>
+      <p class="nota">Seis transações fictícias, sem rótulo verdadeiro. Escolha uma e clique em
+        Analisar no formulário abaixo. Estes exemplos funcionam sem a LLM e não entram no treinamento.</p>
+      <label>Transação de demonstração
+        <select id="exemplo-demo" disabled><option value="">Carregando exemplos…</option></select>
+      </label>
+      <p id="estado-demo" class="nota" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="cartao">
       <h2>Gerar exemplo com LLM local</h2>
       <p class="nota">Entradas fictícias para demonstração, sem rótulo verdadeiro de fraude.
         Os exemplos usam os campos do PaySim: tipo, valor e hora. O classificador continua treinado nessa base.</p>

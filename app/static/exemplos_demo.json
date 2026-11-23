@@ -1,0 +1,8 @@
+[
+  {"descricao": "Saque de 50 mil durante a tarde", "type": "CASH_OUT", "amount": 50000, "hour": 14},
+  {"descricao": "Transferência de um milhão de madrugada", "type": "TRANSFER", "amount": 1000000, "hour": 5},
+  {"descricao": "Saque de um milhão durante a tarde", "type": "CASH_OUT", "amount": 1000000, "hour": 14},
+  {"descricao": "Transferência de 50 mil durante a tarde", "type": "TRANSFER", "amount": 50000, "hour": 14},
+  {"descricao": "Transferência de um milhão durante a tarde", "type": "TRANSFER", "amount": 1000000, "hour": 14},
+  {"descricao": "Saque de 50 mil de madrugada", "type": "CASH_OUT", "amount": 50000, "hour": 5}
+]
