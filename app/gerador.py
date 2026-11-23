@@ -1,12 +1,12 @@
 """Geração local de entradas fictícias para demonstração, sem alterar o treinamento."""
 
 import json
+from typing import Literal
 from urllib.error import HTTPError, URLError
 from urllib.request import ProxyHandler, Request, build_opener
 
 from fastapi import HTTPException
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
-from typing import Literal
 
 
 class Transacao(BaseModel):
@@ -56,6 +56,21 @@ def gerar_cenario(pedido: PedidoCenario):
         method="POST",
     )
     try:
+        # Consulta os metadados antes de enviar o cenário. Isso também identifica
+        # aliases de modelos remotos que não têm "cloud" no nome.
+        consulta = Request(
+            "http://127.0.0.1:11434/api/show",
+            data=json.dumps({"model": pedido.modelo}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with build_opener(ProxyHandler({})).open(consulta, timeout=10) as resposta:
+            metadados = json.loads(resposta.read(1_000_000))
+        if (metadados.get("remote_host") or metadados.get("remote_model")
+                or not metadados.get("model_info")):
+            raise HTTPException(status_code=422, detail=(
+                "Escolha um modelo baixado localmente no Ollama. Modelos remotos não são aceitos."
+            ))
         with build_opener(ProxyHandler({})).open(requisicao, timeout=90) as resposta:
             dados = json.loads(resposta.read(1_000_000))
         cenario = Cenario.model_validate_json(dados["message"]["content"])

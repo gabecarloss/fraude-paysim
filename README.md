@@ -20,6 +20,8 @@ src/            preparação dos dados, treino e avaliação
 
 ## Configuração (Windows / PowerShell)
 
+Ambiente previsto: Python 3.12. Execute os comandos na raiz do projeto.
+
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -56,6 +58,92 @@ tudo nos dois Random Forest com SMOTE.
 - Random Forest como modelo principal, Regressão Logística como comparação.
 - Desbalanceamento tratado com `class_weight` e SMOTE, só no treino, dentro de um Pipeline.
 - Métricas: Precision, Recall, F1, matriz de confusão, PR-AUC e ROC-AUC.
+
+## Entradas fictícias para testes da aplicação
+
+### Exemplos prontos (sem depender da LLM)
+
+A tela oferece seis transações fictícias em `app/static/exemplos_demo.json`.
+Escolha um exemplo e clique em **Analisar**. Os valores não são convertidos para reais.
+Os exemplos variam tipo, valor e hora, permitindo observar como a previsão muda.
+Não possuem rótulo verdadeiro, escore pré-programado ou garantia de alerta; a resposta
+vem do classificador carregado. Não entram no treinamento nem no cálculo das métricas.
+O classificador treinado continua obrigatório para iniciar a API.
+
+### Geração com Ollama
+
+A interface inclui um gerador de transações fictícias via Ollama. Ele usa a API local
+`http://127.0.0.1:11434/api/chat`, sem bibliotecas Python adicionais. Instale o Ollama
+a partir de https://ollama.com/download/windows e baixe antecipadamente um modelo local
+compatível com saídas estruturadas. O download inicial exige internet.
+O desempenho depende do modelo e do computador.
+
+Modelo usado no teste local: `qwen2.5:1.5b`. Para preparar esse mesmo modelo:
+
+```powershell
+ollama pull qwen2.5:1.5b
+ollama list
+```
+
+1. Abra o Ollama e execute `ollama list` para conferir o nome do modelo instalado.
+2. Tenha `models/modelo_aplicacao.joblib` disponível (gerado pelo treinamento e avaliação).
+3. Inicie a aplicação com `uvicorn app.main:app --reload`.
+4. Na tela, informe o nome exato do modelo local e descreva um cenário.
+5. Clique em **Gerar transação fictícia**, revise os campos e clique em **Analisar**.
+
+A LLM gera apenas tipo, valor, hora e descrição. O Random Forest faz a classificação.
+A geração não grava no histórico; ao clicar em Analisar, o fluxo normal salva a análise
+no SQLite. Use um banco de demonstração separado de qualquer registro real.
+As entradas geradas não entram no treino, nas métricas ou na base PaySim. Não possuem
+rótulo verdadeiro e não permitem medir acurácia. Não há garantia de obter um alerta.
+O modelo e os cenários da demonstração mantêm os campos do PaySim: `type`, `amount`
+e `hour`, com os tipos `TRANSFER` e `CASH_OUT`. O valor não recebe conversão de moeda.
+
+Se o Ollama estiver indisponível, a interface informa o erro. Como alternativa manual,
+use o seletor de exemplos prontos. Não há substituição automática da LLM por dados
+pré-programados.
+
+### Artefato necessário
+
+A API exige `models/modelo_aplicacao.joblib`: um arquivo exportado por `src.evaluate`
+com pipeline, limite de decisão e importâncias. Os arquivos de `models/` são ignorados
+pelo Git; clonar o repositório não fornece o classificador treinado.
+Obtenha o artefato com o grupo que executou o treinamento ou gere-o com os comandos
+de preparação, treino e avaliação da seção Execução. Não basta executar a avaliação
+sem os oito modelos treinados que ela carrega.
+
+### Validação técnica e pendências
+
+- Verificada a sintaxe de `app/gerador.py`, `app/main.py` e `app/static/app.js`.
+- Verificados os seis exemplos: tipos permitidos, valores positivos e horas inteiras de 0 a 23.
+- Em 23/11/2026, uma chamada direta à API local do Ollama com `qwen2.5:1.5b`
+  retornou `TRANSFER`, valor 500 e hora 23. Isso valida apenas a geração de campos:
+  não comprova fidelidade ao cenário pedido, qualidade do classificador ou integração completa.
+- A chamada direta não executou o endpoint Python `/gerar-cenario`.
+- Após as correções da revisão, cinco testes Python e três cenários da interface
+  passaram. Cobrem bloqueio de aliases remotos antes do envio do cenário, respostas
+  inválidas, indisponibilidade do Ollama, importâncias ausentes e falhas de comunicação.
+- A função real `gerar_cenario` também foi executada com `qwen2.5:1.5b`, retornando
+  `TRANSFER`, valor 1000 e hora 2. O endpoint e o classificador não participaram desse teste.
+- Esses testes foram executados com Python 3.15 e FastAPI instalado em `.venv`;
+  isso não valida a compatibilidade da pilha completa de treinamento nessa versão.
+- Pendente nesta etapa: executar o backend com dependências instaladas e o artefato
+  treinado, verificar `/gerar-cenario`, `/predict` e `/historico` e validar os erros de entrada.
+  Nenhuma previsão dos novos exemplos foi executada nesta etapa.
+
+Os resultados em `reports/` e os testes anteriores registrados no roteiro são de
+execuções anteriores do grupo; não foram reproduzidos ao implementar o gerador.
+
+Para repetir os testes de regressão na raiz do projeto, com as dependências instaladas:
+
+```powershell
+python -m unittest discover -s tests -v
+node tests/test_interface.cjs
+```
+
+O teste da interface usa Node.js e simula respostas de rede, sem dependências npm.
+Os testes Python simulam o Ollama e não precisam do artefato treinado. O gerador consulta
+`/api/show` antes de enviar o cenário e rejeita modelos remotos ou sem metadados locais.
 
 ## Limitações
 

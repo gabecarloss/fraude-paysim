@@ -74,6 +74,7 @@ function mostrarResultado(dados) {
 
 async function carregarHistorico() {
   const resposta = await fetch("/historico?quantidade=10");
+  if (!resposta.ok) throw new Error("Não foi possível carregar o histórico.");
   const analises = await resposta.json();
   const corpo = document.getElementById("historico");
   corpo.replaceChildren();
@@ -98,40 +99,49 @@ async function carregarHistorico() {
   document.getElementById("historico-vazio").hidden = analises.length > 0;
 }
 
+function mostrarFalhaHistorico() {
+  const aviso = document.getElementById("historico-vazio");
+  aviso.hidden = false;
+  aviso.textContent = "Não foi possível carregar o histórico.";
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   erro.hidden = true;
-  const dados = new FormData(form);
-
-  const resposta = await fetch("/predict", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      type: dados.get("type"),
-      amount: Number(dados.get("amount")),
-      hour: Number(dados.get("hour")),
-    }),
-  });
-  const corpo = await resposta.json();
-
-  if (!resposta.ok) {
-    // No 422, cada erro traz o campo em loc (ex.: ["body", "hour"])
-    const campos = Array.isArray(corpo.detail) ? corpo.detail.map((e) => e.loc.at(-1)) : [];
-    const textos = [...new Set(campos)].map((c) => MENSAGENS[c] ?? `Entrada inválida: ${c}.`);
-    erro.textContent = textos.length ? textos.join(" ") : "Não foi possível analisar a transação.";
-    erro.hidden = false;
+  resultado.hidden = true;
+  const botao = form.querySelector('button[type="submit"]');
+  botao.disabled = true;
+  try {
+    const dados = new FormData(form);
+    const resposta = await fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: dados.get("type"),
+        amount: Number(dados.get("amount")),
+        hour: Number(dados.get("hour")),
+      }),
+    });
+    const corpo = await resposta.json();
+    if (!resposta.ok) {
+      const campos = Array.isArray(corpo.detail) ? corpo.detail.map((e) => e.loc.at(-1)) : [];
+      const textos = [...new Set(campos)].map((c) => MENSAGENS[c] ?? `Entrada inválida: ${c}.`);
+      throw new Error(textos.length ? textos.join(" ") : "Não foi possível analisar a transação.");
+    }
+    mostrarResultado(corpo);
+    await carregarHistorico().catch(mostrarFalhaHistorico);
+  } catch (falha) {
     resultado.hidden = true;
-    return;
+    erro.textContent = falha instanceof TypeError || falha instanceof SyntaxError
+      ? "Falha de comunicação com a aplicação. Confira se o servidor está funcionando."
+      : falha.message;
+    erro.hidden = false;
+  } finally {
+    botao.disabled = false;
   }
-
-  mostrarResultado(corpo);
-  carregarHistorico();
 });
 
-carregarHistorico().catch(() => {
-  document.getElementById("historico-vazio").hidden = false;
-  document.getElementById("historico-vazio").textContent = "Não foi possível carregar o histórico.";
-});
+carregarHistorico().catch(mostrarFalhaHistorico);
 
 document.getElementById("form-gerador").addEventListener("submit", async (event) => {
   event.preventDefault();

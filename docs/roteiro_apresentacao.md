@@ -112,6 +112,28 @@ Legenda: ✅ pronto · ⏳ pendente · ⚠️ conferir antes de apresentar
   e importâncias em `reports/importancia_variaveis.csv`.
 
 ## 9. Aplicação ✅
+- Exemplos fictícios prontos: `app/static/exemplos_demo.json` contém seis entradas.
+  Na interface, escolher uma e clicar em Analisar. Comparar transferência de um milhão
+  às 5h e às 14h; depois comparar saque e transferência com o mesmo valor e horário.
+  Não há rótulo verdadeiro ou escore pré-programado. A previsão vem do classificador.
+  ⏳ Conferir as respostas no artefato treinado antes da apresentação: o arquivo
+  `modelo_aplicacao.joblib` não está disponível neste ambiente.
+- ⏳ Integração de LLM local para a demonstração: implementada via Ollama, ainda sem
+  execução ponta a ponta neste ambiente (dependências completas e artefato do classificador ausentes).
+  A LLM gera uma entrada fictícia, o apresentador revisa e o Random Forest classifica.
+  Não existe rótulo verdadeiro para medir acertos; os exemplos não entram no treinamento.
+  Preparar modelo local e exemplos manuais conferidos antes da apresentação.
+- Teste direto da API local do Ollama em 23/11/2026: instalado `qwen2.5:1.5b` e
+  recebida entrada fictícia válida (`TRANSFER`, valor 500, hora 23). O primeiro teste
+  gerou texto repetitivo e JSON incompleto; ajustados temperatura, penalidade de repetição
+  e instrução de descrição curta. O teste seguinte passou na validação dos campos.
+  Isto confirma geração local, sem comprovar atendimento fiel ao cenário solicitado
+  ou integração ponta a ponta com o classificador. Nenhum escore foi calculado.
+- Revisão técnica: corrigidos o tratamento de importâncias ausentes, os erros de rede
+  da interface e o bloqueio de modelos remotos antes de enviar o cenário ao Ollama.
+  Passaram cinco testes Python e três cenários da interface; a função real do gerador
+  retornou `TRANSFER`, valor 1000 e hora 2 usando `qwen2.5:1.5b` local.
+  Classificação e integração completa continuam pendentes; nenhum escore foi calculado.
 - Fluxo: tela (HTML/CSS/JS) → FastAPI `/predict` → modelo (RF + class_weight, carregado uma vez) →
   limite 0,9886 → resultado na tela e análise salva no SQLite (`/historico` mostra as últimas).
 - A tela mostra a classe, o escore em %, o limite e as importâncias, além do aviso em destaque: ferramenta

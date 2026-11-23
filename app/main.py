@@ -35,7 +35,7 @@ LIMITE = MODELO["limite"]
 # Importâncias GLOBAIS do Random Forest (MDI): dizem quanto cada variável pesou no modelo como um
 # todo, e não nesta transação. Explicar cada transação exigiria outra biblioteca (ex.: SHAP).
 IMPORTANCIAS = sorted(
-    ({"variavel": v, "importancia": round(i, 4)} for v, i in MODELO["importancias"].items()),
+    ({"variavel": v, "importancia": round(i, 4)} for v, i in (MODELO["importancias"] or {}).items()),
     key=lambda item: item["importancia"],
     reverse=True,
 )
