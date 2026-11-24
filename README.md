@@ -197,3 +197,54 @@ constantes. Com o corte temporal escolhido (treino nos dias 1 a 23, teste nos di
 tem cerca de 2,6% de fraude e o treino cerca de 0,23%. Por isso, Precision e PR-AUC da divisão
 temporal não são comparáveis diretamente com as da divisão estratificada. Detalhes em
 `notebooks/01_analise_exploratoria.ipynb`.
+
+## Responsabilidades e contribuições
+
+Divisão levantada a partir do histórico de commits do repositório.
+
+### Gabriel Carlos
+
+**Responsabilidades:** estrutura do projeto, preparação dos dados, análise exploratória,
+modelagem (treino e avaliação), aplicação base (API, histórico e interface) e roteiro da
+apresentação.
+
+- **Estrutura inicial** (22/10/2026): organização das pastas, `src/config.py` com caminhos,
+  variáveis e `RANDOM_STATE`, `requirements.txt`, `.gitignore` e primeira versão do README.
+  Preparação dos dados em `src/prepare_data.py`: filtro de `TRANSFER`/`CASH_OUT`, criação de
+  `hour = step % 24` e exclusão das colunas de saldo e dos identificadores.
+- **Análise exploratória** (22/10/2026): notebook `01_analise_exploratoria.ipynb` com
+  desbalanceamento, valor, hora e transações por dia, e gráficos em `reports/figures/`.
+  Registro da decisão do corte temporal (treino nos dias 1 a 23, teste nos dias 24 a 31)
+  e da queda das legítimas a partir do dia 18 como limitação. Criação do
+  `docs/roteiro_apresentacao.md`.
+- **Treinamento** (23/10/2026): `src/train.py` com os 8 modelos (Random Forest e Regressão
+  Logística, cada um com `class_weight` e com SMOTE, nas divisões estratificada e temporal),
+  divisão em treino/validação/teste antes de qualquer ajuste e pipelines do imbalanced-learn.
+- **Avaliação** (23/10/2026): `src/evaluate.py` com escolha do limite pelo maior F1 na
+  validação, métricas no teste (PR-AUC, ROC-AUC, Precision, Recall, F1 e matriz de confusão),
+  importância das variáveis e escolha do modelo da aplicação
+  (`rf_classweight_estratificada`). Geração de `reports/metricas.csv` e dos gráficos.
+- **Aplicação** (23/10/2026): endpoint `POST /predict` com o modelo escolhido, validação de
+  entrada, `GET /historico` com SQLite e interface em HTML/CSS/JS com os avisos de ferramenta
+  de apoio (LGPD, art. 20) e de base simulada. Testes manuais com o servidor em execução.
+
+### Gabriel Pedro Francio
+
+**Responsabilidades:** entradas fictícias para demonstração da aplicação, testes
+automatizados, nova execução do pipeline para regenerar os artefatos e documentação da
+validação.
+
+- **Gerador com Ollama** (23/11/2026): `app/gerador.py` e endpoint `/gerar-cenario`, que usam
+  uma LLM local para sugerir tipo, valor e hora de transações fictícias; campos
+  correspondentes na interface.
+- **Exemplos para demonstração** (23/11/2026): seis transações fictícias em
+  `app/static/exemplos_demo.json`, com seletor na interface.
+- **Testes e correções** (23/11/2026): `tests/test_gerador.py` e `tests/test_interface.cjs`;
+  correções no tratamento de importâncias ausentes, nas mensagens de falha de comunicação e
+  na rejeição de modelos remotos no gerador. Documentação da execução, dos testes e das
+  limitações no README e no roteiro.
+- **Validação completa** (23/11/2026): novo download do PaySim e execução dos scripts
+  existentes de preparação, treino e avaliação para regenerar `modelo_aplicacao.joblib`,
+  com as métricas reproduzidas. Registro dos novos tempos em `reports/tempos_treino.csv`,
+  preservação dos tempos anteriores em `reports/tempos_treino_2026-10-23.csv` e atualização
+  do README e do roteiro.
